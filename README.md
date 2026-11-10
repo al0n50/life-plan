@@ -1,58 +1,43 @@
-# Life Plan
+# Life Plan OS — Finance & Goal Planning Dashboard
 
-Plan everything (paychecks, bills, debt, savings, career, and the life you're building), starting with what you know now. Built on the Life Plan OS model.
+> A multi-tab life planning tool covering finances, career, health, and travel — in one shareable web app.
 
-Expo SDK 58 + Expo Router + Zustand, for iOS, Android and web from one codebase.
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
 
-## Run it
+---
+
+## Overview
+
+Life Plan OS is a single-page web dashboard for tracking what matters across four life domains: money, career, health, and travel. No backend, no sign-up — just a shareable, responsive tool that runs entirely in the browser and persists state with `localStorage`.
+
+## Features
+
+- **4 Planning Tabs** — Finance, Career, Health, Travel
+- **Persistent State** — plans saved to `localStorage`, survive page refreshes
+- **Finance Tracker** — income, expenses, savings goals, net-worth snapshot
+- **Career Roadmap** — skills to build, jobs to apply for, timeline view
+- **Health Dashboard** — habit tracking, goals, notes
+- **Travel Planner** — trip wishlist and itinerary planning
+- **Fully Responsive** — works on desktop and mobile
+- **Zero Dependencies** — vanilla HTML, CSS, JavaScript
+
+## Getting Started
 
 ```bash
-npm install
-npx expo start          # press w for web, or scan the QR code with Expo Go
+git clone https://github.com/al0n50/life-plan-os
+cd life-plan-os
+# Open index.html in your browser — no build step
+open index.html
 ```
 
-Quality gates, all clean:
+Or visit the live version: *[link coming soon]*
 
-```bash
-npm test                # engine test suite (vitest)
-npx tsc --noEmit
-npx expo lint
-```
+## Screenshots
 
-## How the plan works
+*Coming soon*
 
-- **Paycheck-driven, day by day.** `simulate()` runs every payday, bill, debt due date, and weekly spending drawdown from the plan's start date to 12 years out. Each payday sets aside its share of recurring expenses + minimums, then splits what's left into five buckets: emergency, extra debt, goals, investing, guilt-free fun (20% on purpose).
-- **Phases** decide the split: Crush the debt → Starter fund → Full safety net → Big goals → Build wealth. Two debt approaches: *asap* (debt is Phase 1) or *steady* (minimums with rollover). A custom split is optional.
-- **Plan vs. reality.** The log holds what really happened: paychecks, extra income, one-time spending, confirmed balances. Logged numbers replace estimates. Anything not confirmed is tagged **Estimated**. Past paydays with no log become *paydays to confirm*. After 45 days with no update, Home asks for a full review.
-- **Taxes.** Hourly jobs get a 2026 federal pay stub estimate (standard deduction, brackets, Social Security, Medicare, state %, other deductions). Logged paychecks that differ get a "use N hours" suggestion.
-- **Accounts + routing.** Each bucket has a home account. Account balances are made of parts, and a confirmed balance scales those parts.
-- **Life layer.** North Star + the people it's for, anchor life events, multiple career tracks with milestones (a milestone can point to a future job with a start date), and actions by urgency (urgent / this month / unlocks when a condition is met). Goals can be paused until a condition is met too ("when the card is paid off").
+---
 
-## Code map
-
-```
-src/engine/            Pure TypeScript, no React. Every function takes `today` explicitly.
-  types.ts             Data model (LifeState, schema v2)
-  simulate.ts          The day-by-day engine
-  model.ts             buildModel(state, today) → everything screens need; agenda(); movesFor()
-  updates.ts           Update union + applyUpdate(): the one way state changes (forms now, AI later)
-  phases.ts            Phases, buckets, splits
-  tax.ts, schedule.ts  Pay stub; paydays and due dates
-  conditions.ts        "Unlocks when…" conditions
-  state.ts             blank/example state, v1 → v2 migration, sanitize
-  careerTemplates.ts   Optional career ladders to start a track from
-  __tests__/           vitest suite
-src/store/useLifePlan.ts   Zustand + AsyncStorage persistence, migration, useModel()
-src/app/                   Routes
-  (tabs)/home|calendar|log|life|more
-  paycheck, accounts, income, expenses, debt, goals, plan, review, onboarding/
-src/components/            ui kit, plan (split bar, agenda, phase card), editors, money, logging
-```
-
-## Next (features, not foundation)
-
-- AI setup chat and "tell me what changed" → produce `Update[]`, user reviews, `apply(...)`
-- AI coach that reads a plan snapshot
-- Accounts + cloud sync; bank sync
-- Calendar export / notifications for paydays and bills
-- Native date pickers
+Built by [Alonso Ochoa](https://github.com/al0n50)
