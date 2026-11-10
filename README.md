@@ -56,9 +56,11 @@ life-plan/
 ├── src/
 │   ├── app/
 │   │   ├── (tabs)/          # home, calendar, life, log, more
-│   │   └── screens/         # accounts, debt, expenses, goals, income, paycheck, plan, review, onboarding
-│   ├── engine/              # simulate.ts, schedule.ts, tax.ts, phases.ts, model.ts, types.ts
-│   ├── store/               # useLifePlan.ts (Zustand)
+│   │   ├── onboarding/      # first-run setup
+│   │   └── *.tsx            # accounts, debt, expenses, goals, income, paycheck, plan, review
+│   ├── engine/              # simulate, schedule, tax, phases, model, conditions, dates, updates, state
+│   │   └── __tests__/       # Vitest suites for the engine
+│   ├── store/               # useLifePlan.ts (Zustand + AsyncStorage)
 │   └── components/          # editors, logging, money, plan, ui
 ```
 
@@ -74,6 +76,19 @@ npx expo start
 ```
 
 Press `i` for iOS simulator, `a` for Android, or `w` for web.
+
+---
+
+## Testing
+
+```bash
+npm test            # engine unit tests (Vitest)
+npm run typecheck   # tsc --noEmit
+npm run lint        # expo lint
+npx expo export --platform web   # production web build
+```
+
+All four run in GitHub Actions on every push and pull request.
 
 ---
 
