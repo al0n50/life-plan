@@ -5,6 +5,16 @@
 ![Expo](https://img.shields.io/badge/Expo_58-000020?style=flat&logo=expo&logoColor=white)
 ![React Native](https://img.shields.io/badge/React_Native-20232A?style=flat&logo=react&logoColor=61DAFB)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
+[![CI](https://github.com/al0n50/life-plan/actions/workflows/ci.yml/badge.svg)](https://github.com/al0n50/life-plan/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+<p>
+  <img src="docs/screenshots/welcome.png" alt="Welcome screen" width="250">
+  <img src="docs/screenshots/home.png" alt="Home dashboard with phase, monthly numbers and next paycheck split" width="250">
+  <img src="docs/screenshots/calendar.png" alt="Calendar of paydays, bills and what to move where" width="250">
+</p>
+
+<sub>Screens from the web build running the built-in example plan ("Sam"), not real data.</sub>
 
 ---
 
@@ -93,3 +103,9 @@ All four run in GitHub Actions on every push and pull request.
 ---
 
 Built by [Alonso Ochoa](https://github.com/al0n50)
+
+---
+
+## License
+
+[MIT](LICENSE) © 2026 Alonso Ochoa
