@@ -8,6 +8,8 @@
 [![CI](https://github.com/al0n50/life-plan/actions/workflows/ci.yml/badge.svg)](https://github.com/al0n50/life-plan/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+**Live demo:** [life-plan-os.vercel.app](https://life-plan-os.vercel.app) — tap "Explore an example plan first" to see it with sample data.
+
 <p>
   <img src="docs/screenshots/welcome.png" alt="Welcome screen" width="250">
   <img src="docs/screenshots/home.png" alt="Home dashboard with phase, monthly numbers and next paycheck split" width="250">
