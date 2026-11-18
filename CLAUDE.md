@@ -25,7 +25,7 @@ Live web demo: https://life-plan-os.vercel.app ("Explore an example plan first" 
 | **Localhost & deploy** | `npx expo start` (press `w` for web, `i` iOS, `a` Android). Push to `main` → CI + Vercel builds the web app (`vercel.json`) and deploys it. | ✅ (iOS/Android builds: not set up yet) |
 | **Database** | On-device storage only: Zustand `persist` → AsyncStorage (localStorage on web), key `life-plan-v1`, schema `version: 2` with a `migrate` step. | ✅ (cloud backup/sync: decision pending) |
 | **API & API keys** | None. No network calls, no keys, no third-party services. | ✅ by design |
-| **Checkpoint** | Tagged releases (`vX.Y.Z`) mark known-good versions; rollback steps below. | ✅ |
+| **Checkpoint** | Tagged releases (`vX.Y.Z`) mark known-good versions; rollback steps below. | ⏳ First tagged release waiting on Alonso's OK. Vercel/Pages rollback and `git revert` work today |
 
 ## Architecture
 
