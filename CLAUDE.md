@@ -87,6 +87,9 @@ All of these run in GitHub Actions on every push and pull request.
 
 ## How we ship: every change is a pull request
 
+What we're building: the approved MVP plan in [`docs/PRD.md`](docs/PRD.md), three features built
+one at a time.
+
 1. **Branch** from `main`: `feat/…`, `fix/…`, `docs/…` or `chore/…`. Nothing is pushed straight to `main`.
 2. **Commit small.** Summary line imperative, ≤ 72 characters; body says why and what was tested.
 3. **Review before every commit.** Read the whole staged diff (`git diff --staged`) line by line.
@@ -94,8 +97,10 @@ All of these run in GitHub Actions on every push and pull request.
    it doesn't get committed. Generated files (lockfiles) are checked for unexpected changes.
 4. **Open a pull request** (the template has the checklist). CI runs, and Vercel posts a
    **preview URL** for the PR. Test the change on the preview, not only on localhost.
-5. **Merge** (squash) only when CI is green, the preview has been checked and the review is done.
-   Merging deploys `main` to production; check the live site afterwards.
+5. **Merge** with a merge commit (not squash) once CI is green, the preview has been checked and
+   the review is done. Claude merges after its review (Alonso's call). The merge commit and the PR
+   are credited to Alonso's GitHub account. Merging deploys `main` to production; check the live
+   site afterwards.
 6. **Finish a feature** with a `CHANGELOG.md` entry and a tagged release.
 7. **Database changes** go in the same PR. Previews and production share one database, so
    migrations must be additive and backward-compatible: apply after review, before merging.
