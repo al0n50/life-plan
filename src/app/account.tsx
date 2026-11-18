@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Alert, Platform, View } from 'react-native';
 
 import { Button, Callout, Card, Field, Row, Screen, Section, Text } from '@/components/ui';
+import { buildPlanExport } from '@/engine/exportPlan';
+import { saveTextFile } from '@/lib/saveFile';
 import { useLifeState } from '@/store/useLifePlan';
 import { useAccount, type SyncStatus } from '@/sync/useAccount';
 import { space } from '@/theme';
@@ -229,6 +231,32 @@ function SignedIn() {
   );
 }
 
+/** Export works signed in or out: it's the person's own copy of what's on this device. */
+function YourData() {
+  const plan = useLifeState();
+  const [error, setError] = useState<string | null>(null);
+  const exportPlan = async () => {
+    setError(null);
+    try {
+      const { filename, json } = buildPlanExport(plan);
+      await saveTextFile(filename, json);
+    } catch {
+      setError('Couldn’t save the file. Try again.');
+    }
+  };
+  return (
+    <Section title="Your data">
+      <Text muted style={{ marginBottom: space.md }}>
+        Download your whole plan as a file to keep your own copy. It stays private: the file is made on this device.
+      </Text>
+      <View style={{ alignSelf: 'flex-start' }}>
+        <Button kind="secondary" icon="download-outline" label="Export my plan" onPress={exportPlan} small />
+      </View>
+      {error ? <Callout tone="warn"><Text>{error}</Text></Callout> : null}
+    </Section>
+  );
+}
+
 export default function Account() {
   const { session, ready } = useAccount();
   return (
@@ -238,6 +266,7 @@ export default function Account() {
       intro="Optional. Sign in to back up your plan and use it on your phone and on the web. Without an account, your plan stays only on this device."
     >
       {!ready ? <Text muted>Loading…</Text> : session ? <SignedIn /> : <SignInForm />}
+      <YourData />
       <Text variant="caption" muted style={{ marginTop: space.xl }}>
         Your plan is private to your account: only you can read or change it.
       </Text>
