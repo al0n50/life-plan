@@ -5,7 +5,7 @@
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Session } from '@supabase/supabase-js';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import { create } from 'zustand';
 
 import { localToday } from '@/engine/dates';
@@ -15,6 +15,7 @@ import { supabase } from '@/lib/supabase';
 import { useLifePlan } from '@/store/useLifePlan';
 
 import { decide, EMPTY_META, type RemotePlan, type SyncMeta } from './decide';
+import { MIN_PASSWORD_LENGTH, resetRedirectTo } from './recovery';
 
 const META_KEY = 'life-plan-sync-v1';
 const DEVICE_KEY = 'life-plan-device-id';
@@ -30,10 +31,16 @@ interface AccountStore {
   lastSyncedAt: string | null;
   /** The cloud copy, while the user chooses between it and this device's plan */
   conflict: RemotePlan | null;
+  /** Signed in from a password-reset link: the person still has to choose a new password */
+  recovering: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<'signed-in' | 'confirm-email'>;
   signOut: (removeLocalPlan: boolean) => Promise<void>;
   deleteAccount: () => Promise<void>;
+  /** Email a password-reset link (sent whether or not the account exists, so emails can't be probed) */
+  requestPasswordReset: (email: string) => Promise<void>;
+  /** Finish a reset: set the new password for the account signed in by the reset link */
+  setNewPassword: (password: string) => Promise<void>;
   syncNow: () => Promise<void>;
   resolveConflict: (keep: 'device' | 'cloud') => Promise<void>;
 }
@@ -88,6 +95,9 @@ export function friendlyAuthError(e: unknown): string {
   if (/already registered|already exists/i.test(msg)) return 'There’s already an account with that email. Sign in instead.';
   if (/password should be at least|weak password|password is too/i.test(msg)) return 'Use a longer password (at least 8 characters).';
   if (/valid email|invalid email|unable to validate email/i.test(msg)) return 'Enter a valid email address.';
+  if (/different from the old password/i.test(msg)) return 'Pick a new password, not the one you had before.';
+  if (/auth session missing|session.*expired|token.*expired|otp_expired/i.test(msg)) return 'This reset link has expired or was already used. Ask for a new one.';
+  if (/security purposes|only request this after/i.test(msg)) return 'Wait a minute before asking for another email.';
   if (/rate limit|too many/i.test(msg)) return 'Too many tries. Wait a minute and try again.';
   if (/network|fetch|failed to fetch|timeout/i.test(msg)) return 'Can’t reach the server. Check your connection and try again.';
   return msg || 'Something went wrong. Try again.';
@@ -205,6 +215,7 @@ export const useAccount = create<AccountStore>()((set, get) => {
     message: null,
     lastSyncedAt: null,
     conflict: null,
+    recovering: false,
 
     signIn: async (email, password) => {
       const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
@@ -212,7 +223,7 @@ export const useAccount = create<AccountStore>()((set, get) => {
     },
 
     signUp: async (email, password) => {
-      if (password.length < 8) throw new Error('Use a longer password (at least 8 characters).');
+      if (password.length < MIN_PASSWORD_LENGTH) throw new Error(`Use a longer password (at least ${MIN_PASSWORD_LENGTH} characters).`);
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
@@ -245,6 +256,20 @@ export const useAccount = create<AccountStore>()((set, get) => {
       await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
       await saveMeta({ ...EMPTY_META });
       set({ session: null, status: 'signed-out', message: null, conflict: null, lastSyncedAt: null });
+    },
+
+    requestPasswordReset: async (email) => {
+      const address = email.trim();
+      if (!address) throw new Error('Enter the email you signed up with.');
+      const origin = Platform.OS === 'web' ? globalThis.location?.origin : null;
+      const { error } = await supabase.auth.resetPasswordForEmail(address, { redirectTo: resetRedirectTo(origin) });
+      if (error) throw new Error(friendlyAuthError(error));
+    },
+
+    setNewPassword: async (password) => {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw new Error(friendlyAuthError(error));
+      set({ recovering: false });
     },
 
     syncNow,
@@ -284,8 +309,11 @@ export function startAccountSync() {
   });
 
   supabase.auth.onAuthStateChange((event, session) => {
-    useAccount.setState({ session });
-    if (!session) return;
+    useAccount.setState(event === 'PASSWORD_RECOVERY' ? { session, recovering: true } : { session });
+    if (!session) {
+      useAccount.setState({ recovering: false });
+      return;
+    }
     if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
       useAccount.setState({ status: 'idle' });
       setTimeout(() => useAccount.getState().syncNow(), 0);
