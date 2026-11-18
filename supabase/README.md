@@ -8,8 +8,17 @@ the cloud copy that signed-in devices sync with.
 | File | What it does |
 |---|---|
 | `20261118014312_plans_and_accounts.sql` | `plans`: one saved plan per account (`state` jsonb, `schema_version`, `revision`). Owner-only row-level security, revision bumped by a trigger on every save, size/shape checks, and `delete_my_account()` for in-app account deletion. |
+| `20261118142452_keep_alive.sql` | `ping()`: returns `ok`, callable by anyone, reads nothing. The daily `Keep database awake` GitHub Action calls it so the free project doesn't pause. |
 
 Filenames match the versions recorded in production's migration history.
+
+## Auth settings (Supabase dashboard)
+
+- Site URL `https://life-plan-os.vercel.app`; redirect URLs `https://life-plan-os.vercel.app/**`, `lifeplan://**`
+- Email + password, **confirm email on**, minimum password length 8
+- Not set yet: **custom SMTP**. Supabase's built-in sender only emails the project's team
+  (2/hour), so real users can't get confirmation emails until an email provider is connected.
+- Leaked-password protection needs the Pro plan.
 
 ## How sync uses it
 

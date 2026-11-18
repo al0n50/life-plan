@@ -20,7 +20,7 @@ Live web demo: https://life-plan-os.vercel.app ("Explore an example plan first" 
 | **Frontend & backend** | Expo Router screens (`src/app`) + a pure TypeScript engine (`src/engine`); all math runs on the device. Backend = Supabase project `life-plan` (accounts + one synced plan per account). | ✅ |
 | **Repo** | One repo, `main` is the release branch. README, MIT license, CI, secret scanning + push protection on. | ⏳ "Protect main" ruleset (no force-push or deletion) waiting on Alonso's GitHub email confirmation |
 | **Commit** | Small, single-purpose commits; message rules below; CI must pass. | ✅ |
-| **Auth** | Optional email + password accounts (Supabase Auth). Signed out, the app works fully on one device. In-app account deletion. | ✅ (Alonso: set Site URL + redirect URLs in the Supabase dashboard so confirmation emails link to the live app) |
+| **Auth** | Optional email + password accounts (Supabase Auth). Signed out, the app works fully on one device. In-app account deletion. | ✅ Site URL, redirects, 8-character minimum set. ⏳ Custom SMTP needed before real users can get confirmation emails (see `supabase/README.md`) |
 | **Context window** | This file + AGENTS.md + `supabase/README.md` + README. Update when architecture or rules change. | ✅ |
 | **Localhost & deploy** | `npx expo start` (press `w` for web, `i` iOS, `a` Android). Push to `main` → CI + Vercel builds the web app (`vercel.json`) and deploys it. | ✅ (iOS/Android builds: not set up yet) |
 | **Database** | On the device: Zustand `persist` → AsyncStorage, key `life-plan-v1`, `version: 2` with a `migrate` step. In the cloud: `plans` table (schema as code in `supabase/migrations`, 16 security tests in CI). | ✅ (backups: free plan has none; see roadmap) |
@@ -101,7 +101,7 @@ All of these run in GitHub Actions on every push and pull request.
 
 ## Roadmap
 
-Done: optional accounts + cloud sync (web and phone), in-app account deletion.
+Done: optional accounts + cloud sync (web and phone), in-app account deletion, daily keep-alive.
 Next for a public launch: phone builds (EAS) and store listings, a privacy policy, password reset,
-backups (Supabase Pro or a scheduled export), keep-alive so the free database doesn't pause,
+backups (Supabase Pro or a scheduled export), custom SMTP for auth emails,
 smoother onboarding, screen tests.

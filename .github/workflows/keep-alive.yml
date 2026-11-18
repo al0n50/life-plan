@@ -1,0 +1,29 @@
+# Free Supabase projects pause after a week without activity. Ping the database daily so
+# sign-in and sync stay up. Uses only the public publishable key (no secrets).
+# Note: GitHub turns off scheduled workflows after 60 days with no commits to the repo;
+# re-enable it under Actions if that happens.
+name: Keep database awake
+
+on:
+  schedule:
+    - cron: "23 13 * * *"   # daily, ~9:23 am New York
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping Supabase
+        env:
+          SUPABASE_URL: https://wefbmijbzvuzloijfnnl.supabase.co
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_XJSyPCXKh9XIvnSSH6CjrA_C661_cFg
+        run: |
+          for attempt in 1 2 3; do
+            body=$(curl -sS --max-time 30 -X POST "$SUPABASE_URL/rest/v1/rpc/ping" \
+              -H "apikey: $SUPABASE_PUBLISHABLE_KEY" -H "Content-Type: application/json" -d '{}') && \
+            [ "$body" = '"ok"' ] && { echo "Database is awake"; exit 0; }
+            echo "Attempt $attempt failed: $body"; sleep 20
+          done
+          echo "::error::Supabase did not answer. Check the project in the dashboard (it may be paused)."
+          exit 1
