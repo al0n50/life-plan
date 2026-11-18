@@ -1,0 +1,31 @@
+# Weekly dependency update PRs. CI runs on each one; merge only when it's green.
+# Expo SDK packages are upgraded together with `npx expo install --fix` on SDK upgrades,
+# so Dependabot leaves them alone (a lone bump would break SDK compatibility).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+    commit-message: { prefix: "deps" }
+    ignore:
+      - dependency-name: "expo"
+      - dependency-name: "expo-*"
+      - dependency-name: "@expo/*"
+      - dependency-name: "eslint-config-expo"
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
+      - dependency-name: "@types/react"
+      - dependency-name: "react-native"
+      - dependency-name: "react-native-*"
+      - dependency-name: "@react-native-async-storage/*"
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    commit-message: { prefix: "ci" }
+    groups:
+      actions:
+        patterns: ["*"]

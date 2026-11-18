@@ -104,6 +104,12 @@ All four run in GitHub Actions on every push and pull request.
 
 ---
 
+## Working on this repo
+
+Start with [`CLAUDE.md`](CLAUDE.md): architecture, the saved-data rules, how to run and deploy, and rollback steps. Expo-specific rules are in [`AGENTS.md`](AGENTS.md).
+
+---
+
 Built by [Alonso Ochoa](https://github.com/al0n50)
 
 ---
