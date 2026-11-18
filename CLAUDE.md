@@ -19,7 +19,7 @@ Live web demo: https://life-plan-os.vercel.app ("Explore an example plan first" 
 |---|---|---|
 | **Frontend & backend** | Expo Router screens (`src/app`) + a pure TypeScript engine (`src/engine`); all math runs on the device. Backend = Supabase project `life-plan` (accounts + one synced plan per account). | ✅ |
 | **Repo** | One repo, `main` is the release branch. README, MIT license, CI, secret scanning + push protection on. | ⏳ "Protect main" ruleset (no force-push or deletion) waiting on Alonso's GitHub email confirmation |
-| **Commit** | Small, single-purpose commits; message rules below; CI must pass. | ✅ |
+| **Commit** | Every change is a pull request with a Vercel preview URL, a full self-review of the diff and green CI before merging (see "How we ship"). | ✅ |
 | **Auth** | Optional email + password accounts (Supabase Auth). Signed out, the app works fully on one device. In-app account deletion. | ✅ Site URL, redirects, 8-character minimum set. ⏳ Custom SMTP needed before real users can get confirmation emails (see `supabase/README.md`) |
 | **Context window** | This file + AGENTS.md + `supabase/README.md` + README. Update when architecture or rules change. | ✅ |
 | **Localhost & deploy** | `npx expo start` (press `w` for web, `i` iOS, `a` Android). Push to `main` → CI + Vercel builds the web app (`vercel.json`) and deploys it. | ✅ (iOS/Android builds: not set up yet) |
@@ -85,15 +85,26 @@ All of these run in GitHub Actions on every push and pull request.
 - Product decisions (accounts, sync, app-store release, paid services) go to Alonso.
 - Repo rules: one repo per project; never delete existing repos; no duplicate repos or clones.
 
-## Commits
+## How we ship: every change is a pull request
 
-- Summary line: imperative, ≤ 72 characters, says what changed.
-- Body: why, and what was tested. One logical change per commit. CI green before `main`.
+1. **Branch** from `main`: `feat/…`, `fix/…`, `docs/…` or `chore/…`. Nothing is pushed straight to `main`.
+2. **Commit small.** Summary line imperative, ≤ 72 characters; body says why and what was tested.
+3. **Review before every commit.** Read the whole staged diff (`git diff --staged`) line by line.
+   Every line must be explainable: what it does and why it's needed. If a line can't be explained,
+   it doesn't get committed. Generated files (lockfiles) are checked for unexpected changes.
+4. **Open a pull request** (the template has the checklist). CI runs, and Vercel posts a
+   **preview URL** for the PR. Test the change on the preview, not only on localhost.
+5. **Merge** (squash) only when CI is green, the preview has been checked and the review is done.
+   Merging deploys `main` to production; check the live site afterwards.
+6. **Finish a feature** with a `CHANGELOG.md` entry and a tagged release.
+7. **Database changes** go in the same PR. Previews and production share one database, so
+   migrations must be additive and backward-compatible: apply after review, before merging.
+   Removing old columns or tables waits for a later PR, once no code uses them.
 
 ## Checkpoints & rollback
 
 - **Code:** known-good states of `main` are tagged `vX.Y.Z` with a GitHub release.
-  Undo with `git revert <sha>`. Never force-push `main`.
+  Undo with a revert pull request (`git revert <sha>` on a branch). Never force-push `main`.
 - **Deploy:** Vercel → Deployments → last good one → **Instant Rollback**.
 - **User data:** the device copy is protected across updates by the versioned `migrate` path;
   signed-in users also have the cloud copy. Database migrations are forward-only: undo with a
