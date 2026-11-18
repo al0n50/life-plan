@@ -34,8 +34,8 @@ function when(iso: string | null) {
 }
 
 function SignInForm() {
-  const { signIn, signUp } = useAccount();
-  const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in');
+  const { signIn, signUp, requestPasswordReset } = useAccount();
+  const [mode, setMode] = useState<'sign-in' | 'sign-up' | 'reset'>('sign-in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -46,10 +46,16 @@ function SignInForm() {
     if (busy) return;
     setError(null);
     setNotice(null);
-    if (!email.trim() || !password) return setError('Enter your email and password.');
+    if (mode === 'reset') {
+      if (!email.trim()) return setError('Enter the email you signed up with.');
+    } else if (!email.trim() || !password) return setError('Enter your email and password.');
     setBusy(true);
     try {
-      if (mode === 'sign-in') await signIn(email, password);
+      if (mode === 'reset') {
+        await requestPasswordReset(email);
+        setNotice('If there’s an account with that email, a link to choose a new password is on its way. It works once, for an hour.');
+        setMode('sign-in');
+      } else if (mode === 'sign-in') await signIn(email, password);
       else if ((await signUp(email, password)) === 'confirm-email') {
         setNotice('Check your email and open the confirmation link, then come back and sign in.');
         setMode('sign-in');
@@ -65,20 +71,29 @@ function SignInForm() {
   return (
     <Card>
       <Text variant="heading" style={{ marginBottom: space.md }}>
-        {mode === 'sign-in' ? 'Sign in' : 'Create an account'}
+        {mode === 'sign-in' ? 'Sign in' : mode === 'sign-up' ? 'Create an account' : 'Reset your password'}
       </Text>
+      {mode === 'reset' ? (
+        <Text muted style={{ marginBottom: space.md }}>We’ll email you a link to choose a new password.</Text>
+      ) : null}
       <Field label="Email" value={email} onChangeText={setEmail} placeholder="you@example.com" kind="email" />
-      <Field
-        label="Password"
-        value={password}
-        onChangeText={setPassword}
-        kind={mode === 'sign-in' ? 'password' : 'new-password'}
-        hint={mode === 'sign-up' ? 'At least 8 characters.' : undefined}
-      />
+      {mode !== 'reset' ? (
+        <Field
+          label="Password"
+          value={password}
+          onChangeText={setPassword}
+          kind={mode === 'sign-in' ? 'password' : 'new-password'}
+          hint={mode === 'sign-up' ? 'At least 8 characters.' : undefined}
+        />
+      ) : null}
       {error ? <Callout tone="warn"><Text>{error}</Text></Callout> : null}
       {notice ? <Callout tone="good"><Text>{notice}</Text></Callout> : null}
       <Row style={{ gap: space.sm, flexWrap: 'wrap' }}>
-        <Button label={busy ? 'Please wait…' : mode === 'sign-in' ? 'Sign in' : 'Create account'} onPress={submit} disabled={busy} />
+        <Button
+          label={busy ? 'Please wait…' : mode === 'sign-in' ? 'Sign in' : mode === 'sign-up' ? 'Create account' : 'Email me a link'}
+          onPress={submit}
+          disabled={busy}
+        />
         <Button
           kind="ghost"
           label={mode === 'sign-in' ? 'New here? Create an account' : 'Have an account? Sign in'}
@@ -87,6 +102,17 @@ function SignInForm() {
             setError(null);
           }}
         />
+        {mode === 'sign-in' ? (
+          <Button
+            kind="ghost"
+            label="Forgot password?"
+            onPress={() => {
+              setMode('reset');
+              setError(null);
+              setNotice(null);
+            }}
+          />
+        ) : null}
       </Row>
     </Card>
   );
