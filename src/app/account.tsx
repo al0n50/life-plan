@@ -1,3 +1,4 @@
+import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Platform, View } from 'react-native';
 
@@ -87,6 +88,12 @@ function SignInForm() {
           kind={mode === 'sign-in' ? 'password' : 'new-password'}
           hint={mode === 'sign-up' ? 'At least 8 characters.' : undefined}
         />
+      ) : null}
+      {mode === 'sign-up' ? (
+        <Text variant="caption" muted style={{ marginBottom: space.md }}>
+          By creating an account you agree to the <Link href="/terms" style={{ textDecorationLine: 'underline' }}>Terms of use</Link> and
+          the <Link href="/privacy" style={{ textDecorationLine: 'underline' }}>Privacy policy</Link>.
+        </Text>
       ) : null}
       {error ? <Callout tone="warn"><Text>{error}</Text></Callout> : null}
       {notice ? <Callout tone="good"><Text>{notice}</Text></Callout> : null}
@@ -268,7 +275,10 @@ export default function Account() {
       {!ready ? <Text muted>Loading…</Text> : session ? <SignedIn /> : <SignInForm />}
       <YourData />
       <Text variant="caption" muted style={{ marginTop: space.xl }}>
-        Your plan is private to your account: only you can read or change it.
+        Your plan is private to your account: only you can read or change it.{' '}
+        <Link href="/privacy" style={{ textDecorationLine: 'underline' }}>Privacy policy</Link>
+        {' · '}
+        <Link href="/terms" style={{ textDecorationLine: 'underline' }}>Terms of use</Link>
       </Text>
     </Screen>
   );
