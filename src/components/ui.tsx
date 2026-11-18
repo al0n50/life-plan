@@ -160,6 +160,7 @@ export function Field({
   placeholder,
   numeric,
   hint,
+  kind,
 }: {
   label: string;
   value: string;
@@ -167,6 +168,8 @@ export function Field({
   placeholder?: string;
   numeric?: boolean;
   hint?: string;
+  /** 'email' and 'password' set the right keyboard, autofill and hiding for sign-in forms */
+  kind?: 'email' | 'password' | 'new-password';
 }) {
   const c = useColors();
   return (
@@ -179,7 +182,13 @@ export function Field({
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={c.muted}
-        keyboardType={numeric ? 'decimal-pad' : 'default'}
+        keyboardType={numeric ? 'decimal-pad' : kind === 'email' ? 'email-address' : 'default'}
+        secureTextEntry={kind === 'password' || kind === 'new-password'}
+        autoCapitalize={kind ? 'none' : undefined}
+        autoCorrect={kind ? false : undefined}
+        autoComplete={kind === 'email' ? 'email' : kind === 'password' ? 'current-password' : kind === 'new-password' ? 'new-password' : undefined}
+        textContentType={kind === 'email' ? 'emailAddress' : kind === 'password' ? 'password' : kind === 'new-password' ? 'newPassword' : undefined}
+        accessibilityLabel={label}
         style={[styles.input, { color: c.text, borderColor: c.border, backgroundColor: c.surface }]}
       />
       {hint ? <Text variant="caption" muted style={{ marginTop: 2 }}>{hint}</Text> : null}

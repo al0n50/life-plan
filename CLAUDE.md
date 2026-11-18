@@ -17,14 +17,14 @@ Live web demo: https://life-plan-os.vercel.app ("Explore an example plan first" 
 
 | Fundamental | How it works here | Status |
 |---|---|---|
-| **Frontend & backend** | Frontend only: Expo Router screens (`src/app`) + a pure TypeScript engine (`src/engine`). No server. All math runs on the device. | ✅ by design (a backend is only needed for accounts/sync: decision pending) |
+| **Frontend & backend** | Expo Router screens (`src/app`) + a pure TypeScript engine (`src/engine`); all math runs on the device. Backend = Supabase project `life-plan` (accounts + one synced plan per account). | ✅ |
 | **Repo** | One repo, `main` is the release branch. README, MIT license, CI, secret scanning + push protection on. | ⏳ "Protect main" ruleset (no force-push or deletion) waiting on Alonso's GitHub email confirmation |
 | **Commit** | Small, single-purpose commits; message rules below; CI must pass. | ✅ |
-| **Auth** | None. The plan lives on the device it was made on, so no sign-in is needed. | ✅ by design (accounts come with sync, if chosen) |
-| **Context window** | This file + AGENTS.md + README. Update when architecture or rules change. | ✅ |
+| **Auth** | Optional email + password accounts (Supabase Auth). Signed out, the app works fully on one device. In-app account deletion. | ✅ (Alonso: set Site URL + redirect URLs in the Supabase dashboard so confirmation emails link to the live app) |
+| **Context window** | This file + AGENTS.md + `supabase/README.md` + README. Update when architecture or rules change. | ✅ |
 | **Localhost & deploy** | `npx expo start` (press `w` for web, `i` iOS, `a` Android). Push to `main` → CI + Vercel builds the web app (`vercel.json`) and deploys it. | ✅ (iOS/Android builds: not set up yet) |
-| **Database** | On-device storage only: Zustand `persist` → AsyncStorage (localStorage on web), key `life-plan-v1`, schema `version: 2` with a `migrate` step. | ✅ (cloud backup/sync: decision pending) |
-| **API & API keys** | None. No network calls, no keys, no third-party services. | ✅ by design |
+| **Database** | On the device: Zustand `persist` → AsyncStorage, key `life-plan-v1`, `version: 2` with a `migrate` step. In the cloud: `plans` table (schema as code in `supabase/migrations`, 16 security tests in CI). | ✅ (backups: free plan has none; see roadmap) |
+| **API & API keys** | Supabase only (auth + `plans`). The URL and publishable key are public by design and built into the app (`src/lib/supabase.ts`, overridable with `EXPO_PUBLIC_*`). No secret keys in the app, ever. | ✅ |
 | **Checkpoint** | Tagged releases (`vX.Y.Z`) mark known-good versions of `main`; rollback steps below. | ⏳ v1.0.0 is ready: Alonso creates the tag + release on GitHub from `main` (notes in CHANGELOG.md). Vercel rollback and `git revert` work today |
 
 ## Architecture
@@ -36,6 +36,9 @@ src/components/     editors, logging, money, plan, ui
 src/engine/         pure, tested logic: simulate, schedule, tax, phases, model, conditions,
                     dates, updates, state (blank/example state, sanitize, migrateV1), format
 src/store/          useLifePlan.ts: the single store (Zustand + persist)
+src/sync/           decide.ts (pure sync decisions, tested) + useAccount.ts (sign-in, sync, account deletion)
+src/lib/supabase.ts Supabase client (sessions kept in AsyncStorage)
+supabase/           migrations + security tests for the cloud backend (see supabase/README.md)
 src/theme/          colors, spacing
 ```
 
@@ -44,20 +47,28 @@ src/theme/          colors, spacing
 - **Saved data is a contract.** The persisted shape is versioned (`version: 2`). When it changes:
   bump the version, add a step to `migrate`, keep `sanitize` tolerant of old/partial data, and
   add a test. Never rename the storage key: that would wipe everyone's plan.
-- **Privacy.** It's personal financial data and it stays on the device. Don't add analytics,
-  network calls or third-party SDKs without Alonso's decision.
+- **Local-first sync.** The plan on the device is always what the user sees and edits. Signed
+  in, it syncs with the account's cloud copy: each device remembers the last `revision` it saw;
+  a save only applies if that revision still matches, otherwise the user chooses which plan to
+  keep. The example plan is never uploaded. Never sync silently over someone's changes.
+- **Privacy.** It's personal financial data. Cloud copies are owner-only (row-level security).
+  Don't add analytics, extra network calls or third-party SDKs without Alonso's decision.
 
 ## Run it locally
 
 ```bash
 npm ci
 npx expo start          # dev server; w = web, i = iOS simulator, a = Android
-npm test                # engine tests (Vitest, 45)
+npm test                # engine + sync tests (Vitest, 71)
 npm run typecheck       # tsc --noEmit
 npm run lint            # expo lint
 npx expo export --platform web   # production web build → dist/
 ```
-All four checks run in GitHub Actions on every push and pull request.
+Database tests (local Postgres 15+ with a `postgres` superuser):
+`PGHOST=/tmp PGPORT=55432 PGUSER=postgres scripts/db-test.sh`
+
+All of these run in GitHub Actions on every push and pull request.
+`npx expo install` needs Expo's servers; offline, prefix it with `EXPO_OFFLINE=1`.
 
 ## Deploy
 
@@ -84,10 +95,13 @@ All four checks run in GitHub Actions on every push and pull request.
 - **Code:** known-good states of `main` are tagged `vX.Y.Z` with a GitHub release.
   Undo with `git revert <sha>`. Never force-push `main`.
 - **Deploy:** Vercel → Deployments → last good one → **Instant Rollback**.
-- **User data:** lives on each device. The versioned `migrate` path is what protects it across
-  updates. Export/backup for users is on the roadmap.
+- **User data:** the device copy is protected across updates by the versioned `migrate` path;
+  signed-in users also have the cloud copy. Database migrations are forward-only: undo with a
+  new migration. The Supabase free plan has no automatic backups (Pro adds daily ones).
 
 ## Roadmap
 
-Polish pass next: installable on phones (shareable test build), smoother onboarding, screen tests
-beyond the engine, optional account to sync plans across devices (needs auth + a database: decision).
+Done: optional accounts + cloud sync (web and phone), in-app account deletion.
+Next for a public launch: phone builds (EAS) and store listings, a privacy policy, password reset,
+backups (Supabase Pro or a scheduled export), keep-alive so the free database doesn't pause,
+smoother onboarding, screen tests.

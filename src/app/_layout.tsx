@@ -4,7 +4,11 @@ import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useHydrated } from '@/store/useLifePlan';
+import { startAccountSync } from '@/sync/useAccount';
 import { useColors } from '@/theme';
+
+// Accounts are optional: this only syncs when someone is signed in
+startAccountSync();
 
 export default function RootLayout() {
   const hydrated = useHydrated();

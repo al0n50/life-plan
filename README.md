@@ -28,6 +28,12 @@ Life Plan OS is a cross-platform (iOS, Android, Web) personal finance and life p
 
 ## Features
 
+**Accounts & Sync (optional)**
+- Email + password accounts; the app works fully without one
+- Your plan backs up to the cloud and syncs between phone and web
+- If two devices changed, you choose which plan to keep; nothing is overwritten silently
+- Delete your account from inside the app
+
 **Financial Engine**
 - Income & paycheck simulation with tax estimation
 - Expense tracking and budget planning
@@ -58,6 +64,7 @@ Life Plan OS is a cross-platform (iOS, Android, Web) personal finance and life p
 | State | Zustand |
 | Web Support | react-native-web |
 | Financial Engine | Custom simulation: simulate, schedule, tax, phases, model |
+| Backend | Supabase (Auth + Postgres with row-level security), schema as code in `supabase/` |
 
 ---
 

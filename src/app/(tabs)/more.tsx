@@ -6,6 +6,7 @@ import { Screen, Text, type IconName } from '@/components/ui';
 import { radius, space, useColors } from '@/theme';
 
 const ITEMS: { href: Href; title: string; sub: string; icon: IconName }[] = [
+  { href: '/account', title: 'Account & sync', sub: 'Back up your plan and use it on every device', icon: 'cloud-outline' },
   { href: '/paycheck', title: 'Paycheck', sub: 'Your next paycheck and where it goes', icon: 'cash-outline' },
   { href: '/accounts', title: 'Accounts', sub: 'Checking, savings, HYSA, investing, and routing', icon: 'wallet-outline' },
   { href: '/income', title: 'Income', sub: 'Jobs, hours, future income, and your pay stub', icon: 'briefcase-outline' },
