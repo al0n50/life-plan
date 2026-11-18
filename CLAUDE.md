@@ -18,14 +18,14 @@ Live web demo: https://life-plan-os.vercel.app ("Explore an example plan first" 
 | Fundamental | How it works here | Status |
 |---|---|---|
 | **Frontend & backend** | Frontend only: Expo Router screens (`src/app`) + a pure TypeScript engine (`src/engine`). No server. All math runs on the device. | ✅ by design (a backend is only needed for accounts/sync: decision pending) |
-| **Repo** | One repo, `main` is the release branch. README, MIT license, CI, secret scanning + push protection on. | ✅ (branch protection: decision pending) |
+| **Repo** | One repo, `main` is the release branch. README, MIT license, CI, secret scanning + push protection on. | ✅ `main` protected: no force-push or deletion |
 | **Commit** | Small, single-purpose commits; message rules below; CI must pass. | ✅ |
 | **Auth** | None. The plan lives on the device it was made on, so no sign-in is needed. | ✅ by design (accounts come with sync, if chosen) |
 | **Context window** | This file + AGENTS.md + README. Update when architecture or rules change. | ✅ |
 | **Localhost & deploy** | `npx expo start` (press `w` for web, `i` iOS, `a` Android). Push to `main` → CI + Vercel builds the web app (`vercel.json`) and deploys it. | ✅ (iOS/Android builds: not set up yet) |
 | **Database** | On-device storage only: Zustand `persist` → AsyncStorage (localStorage on web), key `life-plan-v1`, schema `version: 2` with a `migrate` step. | ✅ (cloud backup/sync: decision pending) |
 | **API & API keys** | None. No network calls, no keys, no third-party services. | ✅ by design |
-| **Checkpoint** | Tagged releases (`vX.Y.Z`) mark known-good versions; rollback steps below. | ⏳ First tagged release waiting on Alonso's OK. Vercel/Pages rollback and `git revert` work today |
+| **Checkpoint** | Tagged releases (`vX.Y.Z`) mark known-good versions of `main`; rollback steps below. | ✅ Latest: v1.0.0 |
 
 ## Architecture
 
